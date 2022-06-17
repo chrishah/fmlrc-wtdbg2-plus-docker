@@ -1,32 +1,25 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
+ENV DEBIAN_FRONTEND noninteractive
+ENV DEBCONF_NONINTERACTIVE_SEEN true
 RUN apt-get update && \
 	apt-get install -y \
-		git=1:2.17.1-1ubuntu0.7 \
-		build-essential=12.4ubuntu1 \
-		zlib1g-dev=1:1.2.11.dfsg-0ubuntu2 \
-		cmake=3.10.2-1ubuntu2.18.04.1 \
-		python-pip=9.0.1-2.3~ubuntu1.18.04.2 \
-		samtools=1.7-1
+		build-essential \
+		git \
+		zlib1g-dev \
+		cmake \
+		samtools \
+		cargo \
+		rustc 
 
 WORKDIR /usr/src
 
-#install msbwt
-RUN pip install numpy==1.16.6 && \
-	pip install msbwt==0.3.0
-
-#download and install ropebwt2 (commit 1.10.2018)
+#download and install ropebwt2 (commit 1.2.2021)
 RUN git clone https://github.com/lh3/ropebwt2.git && \
 	cd ropebwt2 && \
-	git reset --hard a1e20c968f19652c607093f309acb7b858e334e4 && \
+	git reset --hard bd8dbd3db2e9e3cff74acc2907c0742c9ebbf033 && \
 	make && \
 	ln -s $(pwd)/ropebwt2 /usr/bin/
-
-#download and install fmlrc
-RUN git clone https://github.com/holtjma/fmlrc && \
-	cd fmlrc && \
-	git checkout v1.0.0 && \
-	make
 
 #download and install wtdbg2
 RUN git clone https://github.com/ruanjue/wtdbg2 && \
@@ -37,7 +30,7 @@ RUN git clone https://github.com/ruanjue/wtdbg2 && \
 #install minimap2
 RUN git clone https://github.com/lh3/minimap2.git && \
 	cd minimap2/ && \
-	git checkout v2.17 && \
+	git checkout v2.24 && \
 	make && \
 	ln -s $(pwd)/minimap2 /usr/bin/
 
@@ -48,5 +41,8 @@ RUN git clone https://github.com/lh3/bwa.git && \
 	make && \
 	ln -s $(pwd)/bwa /usr/bin/
 
-ENV PATH="/usr/src/fmlrc:/usr/src/wtdbg2/:$PATH"
+#download and install fmlrc
+RUN cargo install fmlrc --version 0.1.7
+
+ENV PATH="/root/.cargo/bin:/usr/src/wtdbg2/:$PATH"
 
